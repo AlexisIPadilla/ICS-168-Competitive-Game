@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class PlayerObject : NetworkBehaviour
+public class PlayerConnectionObject : NetworkBehaviour
 {
     public GameObject playerUnitPrefab;
 
@@ -15,12 +15,28 @@ public class PlayerObject : NetworkBehaviour
             return;
         }
         Debug.Log("PlayerObject::Start -- Spawning my own personal unit");
-        Instantiate(playerUnitPrefab);
+        CmdSpawnMyUnit();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (isLocalPlayer == false)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            CmdSpawnMyUnit();
+        }
+    }
+
+    [Command]
+    void CmdSpawnMyUnit()
+    {
+        GameObject go = Instantiate(playerUnitPrefab);
+
+        NetworkServer.SpawnWithClientAuthority(go, connectionToClient);
     }
 }
