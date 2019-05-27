@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5791614935989125886}
   - component: {fileID: 4195207151454969371}
   m_Layer: 0
-  m_Name: PlayerObject
+  m_Name: PlayerConnectionObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -77,5 +77,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11b8d322bf39e4d43b78222212552b0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerUnitPrefab: {fileID: 5020405822785429466, guid: 2f8709a1cf68f514aa657d659a6cc9d6,
+  PlayerUnitPrefab: {fileID: 5020405822785429466, guid: 2f8709a1cf68f514aa657d659a6cc9d6,
     type: 3}
+  PlayerName: Anonymous
