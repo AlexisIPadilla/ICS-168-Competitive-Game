@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/AlexisScene.unity
+    guid: 59c30c67baa1b48418ff01bd0e4e3e15
   m_configObjects: {}

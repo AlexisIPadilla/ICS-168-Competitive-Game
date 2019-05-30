@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -8,13 +8,16 @@ public class PlayerUnit : NetworkBehaviour
     Vector3 velocity;
     Vector3 bestGuessPosition;
 
+    public float speed;
+    public Transform cameraFocus;
+    bool cameraUnset = true;
+
     float ourLatency;
     float latencySmoothingFactor = 10;
 
     // Start is called before the first frame update
     void Start()
     {
-        
     }
 
     // Update is called once per frame
@@ -31,21 +34,18 @@ public class PlayerUnit : NetworkBehaviour
 
         transform.Translate(velocity * Time.deltaTime);
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            this.transform.Translate(0,1,0);
-        }
+        velocity = new Vector3(Input.GetAxis("Horizontal") * speed, 0, Input.GetAxis("Vertical") * speed);
 
-        if (Input.GetKeyDown(KeyCode.D))
+        CmdUpdateVelocity(velocity, transform.position);
+
+        if (Input.GetKeyDown(KeyCode.P))
         {
             Destroy(gameObject);
         }
 
-        if ( /* some input */ true)
-        {
-            velocity = new Vector3(1, 0, 0);
-
-            CmdUpdateVelocity(velocity, transform.position);
+        if (cameraUnset) {
+            cameraUnset = false;
+            Camera.main.GetComponent<cameraScript>().player = cameraFocus;
         }
     }
 
@@ -72,7 +72,7 @@ public class PlayerUnit : NetworkBehaviour
             return;
         }
 
-        // I am a non-authoratative client, so I definitely need to listen to the server.
+        // I am a non-authoritative client, so I definitely need to listen to the server.
 
         // If we know what our current latency is, we could do something like this:
         //  transform.position = p + (v * (ourLatency))

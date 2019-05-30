@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -29,7 +29,7 @@ public class PlayerConnectionObject : NetworkBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.O))
         {
             CmdSpawnMyUnit();
         }
@@ -38,7 +38,7 @@ public class PlayerConnectionObject : NetworkBehaviour
         {
             string n = "Player" + Random.Range(1, 100);
 
-            Debug.Log("Sending the serever a request to change our name to: " + n);
+            Debug.Log("Sending the server a request to change our name to: " + n);
             CmdChangePlayerName(n);
         }
     }
@@ -66,14 +66,14 @@ public class PlayerConnectionObject : NetworkBehaviour
         Debug.Log("CmdChangePlayerName: " + n);
         PlayerName = n;
 
-        //RpcChangePlayerName(n);
+        RpcChangePlayerName(n);
     }
 
-/*    [ClientRpc]
+    [ClientRpc]
     void RpcChangePlayerName(string n)
     {
         Debug.Log("RpcChangePlayerName: We were asked to change the player name on a particular PlayerConnectionObject: " + n);
         PlayerName = n;
     }
-*/
+
 }

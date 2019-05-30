@@ -18,7 +18,16 @@ public class cameraScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetKeyDown(KeyCode.LeftControl)) Cursor.lockState = CursorLockMode.Locked;
+		if (Input.GetKeyDown(KeyCode.LeftControl)) {
+			Cursor.lockState = CursorLockMode.Locked;
+			Cursor.visible = false;
+		}
+
+		if (Input.GetKeyDown(KeyCode.Escape)) {
+			Cursor.lockState = CursorLockMode.None;
+			Cursor.visible = true;
+		}
+
 		if (target != null && player != null) {
 			transform.LookAt(target);
 			cameraDir = -this.transform.forward;
@@ -29,8 +38,10 @@ public class cameraScript : MonoBehaviour {
 			else this.transform.position = player.position + cameraDir*maxDist + player.right*horizontalOffset;
 			
 			if (lockPlayerRotation) {
-				Transform testTransform = player.parent.transform;
-				testTransform.localRotation = Quaternion.Euler(testTransform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z);
+				if (player.parent != null) {
+					Transform testTransform = player.parent.transform;
+					testTransform.localRotation = Quaternion.Euler(testTransform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z);
+				}
 			}
 		}
 	}
