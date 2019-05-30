@@ -10,6 +10,8 @@ public class PlayerUnit : NetworkBehaviour
 
     public float speed;
     public Transform cameraFocus;
+    public float jumpSpeed;
+    public float verticalDragSpeed;
     bool cameraUnset = true;
 
     float ourLatency;
@@ -34,7 +36,14 @@ public class PlayerUnit : NetworkBehaviour
 
         transform.Translate(velocity * Time.deltaTime);
 
-        velocity = new Vector3(Input.GetAxis("Horizontal") * speed, 0, Input.GetAxis("Vertical") * speed);
+        velocity = new Vector3(Input.GetAxis("Horizontal") * speed, velocity.y, Input.GetAxis("Vertical") * speed);
+
+        if (Mathf.Abs(velocity.y) < verticalDragSpeed)
+            velocity.y = 0;
+        else if (velocity.y > 0)
+            velocity.y = velocity.y - verticalDragSpeed;
+        else
+            velocity.y = velocity.y + verticalDragSpeed;
 
         CmdUpdateVelocity(velocity, transform.position);
 
@@ -43,9 +52,22 @@ public class PlayerUnit : NetworkBehaviour
             Destroy(gameObject);
         }
 
-        if (cameraUnset) {
+        if (cameraUnset)
+        {
             cameraUnset = false;
             Camera.main.GetComponent<cameraScript>().player = cameraFocus;
+        }
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            if (velocity.y == 0) {
+                if (Input.GetButton("Alternate Button")) {
+                    velocity = velocity + new Vector3(0, -jumpSpeed, 0);
+                }
+                else {
+                    velocity = velocity + new Vector3(0, jumpSpeed, 0);
+                }
+            }
         }
     }
 
