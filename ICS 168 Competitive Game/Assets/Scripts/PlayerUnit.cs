@@ -38,12 +38,13 @@ public class PlayerUnit : NetworkBehaviour
 
         velocity = new Vector3(Input.GetAxis("Horizontal") * speed, velocity.y, Input.GetAxis("Vertical") * speed);
 
-        if (Mathf.Abs(velocity.y) < verticalDragSpeed)
+        float deltaVVel = verticalDragSpeed * Time.deltaTime; //Multiply by deltaTime to keep it consistent for different frame rates
+        if (Mathf.Abs(velocity.y) < deltaVVel)                //Snap velocity to 0 if it's less than what we're changing it by
             velocity.y = 0;
-        else if (velocity.y > 0)
-            velocity.y = velocity.y - verticalDragSpeed;
+        else if (velocity.y > 0)                              //Otherwise, increase/decrease the velocity appropriately
+            velocity.y = velocity.y - deltaVVel;
         else
-            velocity.y = velocity.y + verticalDragSpeed;
+            velocity.y = velocity.y + deltaVVel;
 
         CmdUpdateVelocity(velocity, transform.position);
 
@@ -52,6 +53,8 @@ public class PlayerUnit : NetworkBehaviour
             Destroy(gameObject);
         }
 
+        //If we haven't already set the focus of the main camera, set it to this one.
+        //We already know this is our own player character, so we won't accidentally follow someone else.
         if (cameraUnset)
         {
             cameraUnset = false;
@@ -60,12 +63,14 @@ public class PlayerUnit : NetworkBehaviour
 
         if (Input.GetButtonDown("Jump"))
         {
+            //Only allow further jumps if you are no longer moving vertically.
+            //This feels kinda bad, so further refinement may have to be done.
             if (velocity.y == 0) {
                 if (Input.GetButton("Alternate Button")) {
-                    velocity = velocity + new Vector3(0, -jumpSpeed, 0);
+                    velocity.y = velocity.y - jumpSpeed;
                 }
                 else {
-                    velocity = velocity + new Vector3(0, jumpSpeed, 0);
+                    velocity.y = velocity.y + jumpSpeed;
                 }
             }
         }
