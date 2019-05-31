@@ -82,8 +82,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 5
   cameraFocus: {fileID: 1606223387581203834}
-  jumpSpeed: 5
+  jumpSpeed: 10
   verticalDragSpeed: 5
+  heightLevel: 0
+  planeVertDist: 3
 --- !u!114 &5696553941865811346
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -9,9 +9,13 @@ public class PlayerUnit : NetworkBehaviour
     Vector3 bestGuessPosition;
 
     public float speed;
-    public Transform cameraFocus;
+
     public float jumpSpeed;
     public float verticalDragSpeed;
+    public int heightLevel;
+    public float planeVertDist;
+
+    public Transform cameraFocus;
     bool cameraUnset = true;
 
     float ourLatency;
@@ -38,28 +42,18 @@ public class PlayerUnit : NetworkBehaviour
 
         velocity = new Vector3(Input.GetAxis("Horizontal") * speed, velocity.y, Input.GetAxis("Vertical") * speed);
 
-        float deltaVVel = verticalDragSpeed * Time.deltaTime; //Multiply by deltaTime to keep it consistent for different frame rates
+        CmdUpdateVelocity(velocity, transform.position);
+
+
+
+        //-----ORIGINAL JUMP CODE STARTS HERE-----
+        /*float deltaVVel = verticalDragSpeed * Time.deltaTime; //Multiply by deltaTime to keep it consistent for different frame rates
         if (Mathf.Abs(velocity.y) < deltaVVel)                //Snap velocity to 0 if it's less than what we're changing it by
             velocity.y = 0;
         else if (velocity.y > 0)                              //Otherwise, increase/decrease the velocity appropriately
             velocity.y = velocity.y - deltaVVel;
         else
             velocity.y = velocity.y + deltaVVel;
-
-        CmdUpdateVelocity(velocity, transform.position);
-
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            Destroy(gameObject);
-        }
-
-        //If we haven't already set the focus of the main camera, set it to this one.
-        //We already know this is our own player character, so we won't accidentally follow someone else.
-        if (cameraUnset)
-        {
-            cameraUnset = false;
-            Camera.main.GetComponent<cameraScript>().player = cameraFocus;
-        }
 
         if (Input.GetButtonDown("Jump"))
         {
@@ -73,6 +67,50 @@ public class PlayerUnit : NetworkBehaviour
                     velocity.y = velocity.y + jumpSpeed;
                 }
             }
+        }*/
+        //-----ORIGINAL JUMP CODE ENDS HERE-----
+
+        //-----ALTERNATE JUMP CODE STARTS HERE-----
+        //Move between levels at a constant velocity.
+        if (Input.GetButtonDown("Jump"))
+        {
+            if (Input.GetButton("Alternate Button")) {
+                --heightLevel;
+                velocity.y = -jumpSpeed;
+            }
+            else {
+                ++heightLevel;
+                velocity.y = jumpSpeed;
+            }
+        }
+
+        //If you're moving up, and you're above the height you should be at, stop.
+        //Same idea if you're moving down.
+        float targetHeight = heightLevel * planeVertDist;
+        if (velocity.y > 0 && transform.position.y > targetHeight) {
+            velocity.y = 0;
+            transform.position = new Vector3(transform.position.x, targetHeight, transform.position.z);
+        }
+
+        if (velocity.y < 0 && transform.position.y < heightLevel * planeVertDist) {
+            velocity.y = 0;
+            transform.position = new Vector3(transform.position.x, targetHeight, transform.position.z);
+        }
+        //-----ALTERNATE JUMP CODE ENDS HERE-----
+
+
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            Destroy(gameObject);
+        }
+
+        //If we haven't already set the focus of the main camera, set it to this one.
+        //We already know this is our own player character, so we won't accidentally follow someone else.
+        if (cameraUnset)
+        {
+            cameraUnset = false;
+            Camera.main.GetComponent<cameraScript>().player = cameraFocus;
         }
     }
 
