@@ -5,6 +5,11 @@ using UnityEngine.Networking;
 
 public class PlayerUnit : NetworkBehaviour
 {
+    public int maxHealth;
+    public int health;
+    public bool positionLock;
+    public GameObject bullet;
+
     Vector3 velocity;
     Vector3 bestGuessPosition;
 
@@ -17,6 +22,7 @@ public class PlayerUnit : NetworkBehaviour
 
     public Transform cameraFocus;
     bool cameraUnset = true;
+    Transform cameraTransform;
 
     float ourLatency;
     float latencySmoothingFactor = 10;
@@ -24,6 +30,7 @@ public class PlayerUnit : NetworkBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        cameraTransform = Camera.main.transform;
     }
 
     // Update is called once per frame
@@ -40,7 +47,10 @@ public class PlayerUnit : NetworkBehaviour
 
         transform.Translate(velocity * Time.deltaTime);
 
-        velocity = new Vector3(Input.GetAxis("Horizontal") * speed, velocity.y, Input.GetAxis("Vertical") * speed);
+        if (positionLock)
+            velocity = Vector3.zero;
+        else
+            velocity = new Vector3(Input.GetAxis("Horizontal") * speed, velocity.y, Input.GetAxis("Vertical") * speed);
 
         CmdUpdateVelocity(velocity, transform.position);
 
@@ -100,18 +110,44 @@ public class PlayerUnit : NetworkBehaviour
 
 
 
+        if (Input.GetButtonDown("Fire1")) {
+            //Debug.Log ("Trying to stop moving.");
+            CmdSpawnBullet(cameraTransform.position + cameraTransform.forward * 3, cameraTransform.rotation);
+            //CmdStartSkill(true);
+        }
+
+
+
         if (Input.GetKeyDown(KeyCode.P))
         {
             Destroy(gameObject);
         }
 
-        //If we haven't already set the focus of the main camera, set it to this one.
+        //If we haven't already set the focus of the main camera to this, set it to this.
         //We already know this is our own player character, so we won't accidentally follow someone else.
         if (cameraUnset)
         {
             cameraUnset = false;
             Camera.main.GetComponent<cameraScript>().player = cameraFocus;
         }
+    }
+
+    [Command]
+    void CmdSpawnBullet(Vector3 p, Quaternion r)
+    {
+        GameObject newBullet = Instantiate(bullet, p, r);
+
+        //NetworkServer.SpawnWithClientAuthority(newBullet, connectionToClient);
+
+        RpcSpawnBullet(p, r);
+    }
+
+    [ClientRpc]
+    void RpcSpawnBullet(Vector3 p, Quaternion r)
+    {
+        if (hasAuthority)
+            return;
+        GameObject newBullet = Instantiate(bullet, p, r);
     }
 
     [Command]
@@ -152,6 +188,23 @@ public class PlayerUnit : NetworkBehaviour
 
         // IN FACT, we don't want to directly update transform.position, because then 
         // players will keep teleporting/blinking as the updates come in. It looks dumb.
+    }
+
+
+    [Command]
+    void CmdStartSkill(bool pLock) {
+        Debug.Log("Locking Position on Server");
+        positionLock = pLock;
+
+        RpcStartSkill(pLock);
+    }
+
+    [ClientRpc]
+    void RpcStartSkill(bool pLock) {
+        if (hasAuthority)
+            return;
+        Debug.Log("I'm a client that got locked.");
+        positionLock = pLock;
     }
 
 
