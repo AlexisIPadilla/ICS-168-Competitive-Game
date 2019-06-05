@@ -139,7 +139,9 @@ public class PlayerUnit : NetworkBehaviour
 
         //NetworkServer.SpawnWithClientAuthority(newBullet, connectionToClient);
 
-        RpcSpawnBullet(p, r);
+        //RpcSpawnBullet(p, r);
+
+        NetworkServer.Spawn(newBullet);
     }
 
     [ClientRpc]
