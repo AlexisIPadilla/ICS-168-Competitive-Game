@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6193547923566852575}
   - component: {fileID: 2906491911712579235}
   - component: {fileID: 5696553941865811346}
+  - component: {fileID: -9062402135680227520}
   m_Layer: 0
   m_Name: PlayerUnit
   m_TagString: Untagged
@@ -112,6 +113,19 @@ MonoBehaviour:
   m_SnapThreshold: 5
   m_InterpolateRotation: 1
   m_InterpolateMovement: 1
+--- !u!135 &-9062402135680227520
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5020405822785429466}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6414767234797077349
 GameObject:
   m_ObjectHideFlags: 0

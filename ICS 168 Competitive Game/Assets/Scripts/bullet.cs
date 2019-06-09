@@ -9,6 +9,8 @@ public class bullet : NetworkBehaviour
     Vector3 velocity;
     Vector3 bestGuessPosition;
 
+    public GameObject owner;
+
     public float speed;
     public float deathTime;
     void Start()
@@ -22,6 +24,17 @@ public class bullet : NetworkBehaviour
     void Update()
     {
         transform.Translate(velocity * Time.deltaTime);
+    }
+
+    void OnTriggerEnter(Collider other) {
+        if (hasAuthority) {
+            if (other.gameObject != owner) {
+                PlayerUnit opponent = other.gameObject.GetComponent<PlayerUnit>();
+                if (opponent) {
+                    opponent.CmdDamage(10);
+                }
+            }
+        }
     }
 
     IEnumerator Example()

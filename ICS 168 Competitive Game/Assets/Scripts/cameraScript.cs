@@ -10,6 +10,8 @@ public class cameraScript : MonoBehaviour {
 	public Vector3 cameraDir;
 	public float horizontalOffset;
 	public bool lockPlayerRotation;
+
+        public healthBar HPBar;
 	
 	// Use this for initialization
 	void Start () {

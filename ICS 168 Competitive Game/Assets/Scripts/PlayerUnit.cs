@@ -129,6 +129,7 @@ public class PlayerUnit : NetworkBehaviour
         {
             cameraUnset = false;
             Camera.main.GetComponent<cameraScript>().player = cameraFocus;
+            Camera.main.GetComponent<cameraScript>().HPBar.player = this;
         }
     }
 
@@ -136,20 +137,9 @@ public class PlayerUnit : NetworkBehaviour
     void CmdSpawnBullet(Vector3 p, Quaternion r)
     {
         GameObject newBullet = Instantiate(bullet, p, r);
-
-        //NetworkServer.SpawnWithClientAuthority(newBullet, connectionToClient);
-
-        //RpcSpawnBullet(p, r);
+        newBullet.GetComponent<bullet>().owner = gameObject;
 
         NetworkServer.Spawn(newBullet);
-    }
-
-    [ClientRpc]
-    void RpcSpawnBullet(Vector3 p, Quaternion r)
-    {
-        if (hasAuthority)
-            return;
-        GameObject newBullet = Instantiate(bullet, p, r);
     }
 
     [Command]
@@ -209,5 +199,19 @@ public class PlayerUnit : NetworkBehaviour
         positionLock = pLock;
     }
 
+    [Command]
+    public void CmdDamage(int amount) {
+        health -= amount;
+        if (health < 0)
+            health = 0;
+        if (health > maxHealth)
+            health = maxHealth;
+        RpcUpdateHealth(health);
+    }
+
+    [ClientRpc]
+    void RpcUpdateHealth(int newHealth) {
+        health = newHealth;
+    }
 
 }
