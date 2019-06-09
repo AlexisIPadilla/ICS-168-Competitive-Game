@@ -87,7 +87,7 @@ MonoBehaviour:
   bullet: {fileID: 7035560239726607945, guid: 4eb1c5286dcdb4ca1849f4ec220c0e66, type: 3}
   speed: 5
   jumpSpeed: 10
-  verticalDragSpeed: 5
+  dragSpeed: 5
   heightLevel: 0
   planeVertDist: 3
   cameraFocus: {fileID: 1606223387581203834}

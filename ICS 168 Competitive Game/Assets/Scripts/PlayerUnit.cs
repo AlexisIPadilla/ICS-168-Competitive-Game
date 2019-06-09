@@ -16,7 +16,8 @@ public class PlayerUnit : NetworkBehaviour
     public float speed;
 
     public float jumpSpeed;
-    public float verticalDragSpeed;
+    public float dragSpeed;
+    Vector3 externalVelocity;
     public int heightLevel;
     public float planeVertDist;
 
@@ -38,47 +39,29 @@ public class PlayerUnit : NetworkBehaviour
     {
        if (hasAuthority == false)
         {
-            bestGuessPosition = bestGuessPosition + (velocity * Time.deltaTime);
+            bestGuessPosition = bestGuessPosition + ((velocity + externalVelocity) * Time.deltaTime);
 
             transform.position = Vector3.Lerp(transform.position, bestGuessPosition, Time.deltaTime * latencySmoothingFactor);
 
             return;
         }
-
         transform.Translate(velocity * Time.deltaTime);
+        transform.Translate(externalVelocity * Time.deltaTime, Space.World);
 
         if (positionLock)
             velocity = Vector3.zero;
         else
             velocity = new Vector3(Input.GetAxis("Horizontal") * speed, velocity.y, Input.GetAxis("Vertical") * speed);
 
-        CmdUpdateVelocity(velocity, transform.position);
+        CmdUpdateVelocity(velocity, externalVelocity, transform.position);
 
 
 
-        //-----ORIGINAL JUMP CODE STARTS HERE-----
-        /*float deltaVVel = verticalDragSpeed * Time.deltaTime; //Multiply by deltaTime to keep it consistent for different frame rates
-        if (Mathf.Abs(velocity.y) < deltaVVel)                //Snap velocity to 0 if it's less than what we're changing it by
-            velocity.y = 0;
-        else if (velocity.y > 0)                              //Otherwise, increase/decrease the velocity appropriately
-            velocity.y = velocity.y - deltaVVel;
+        Vector3 deltaVel = externalVelocity.normalized * -dragSpeed * Time.deltaTime; //Multiply by deltaTime to keep it consistent for different frame rates
+        if (externalVelocity.magnitude < deltaVel.magnitude)                //Snap velocity to 0 if it's less than what we're changing it by
+            externalVelocity = Vector3.zero;
         else
-            velocity.y = velocity.y + deltaVVel;
-
-        if (Input.GetButtonDown("Jump"))
-        {
-            //Only allow further jumps if you are no longer moving vertically.
-            //This feels kinda bad, so further refinement may have to be done.
-            if (velocity.y == 0) {
-                if (Input.GetButton("Alternate Button")) {
-                    velocity.y = velocity.y - jumpSpeed;
-                }
-                else {
-                    velocity.y = velocity.y + jumpSpeed;
-                }
-            }
-        }*/
-        //-----ORIGINAL JUMP CODE ENDS HERE-----
+            externalVelocity += deltaVel;
 
         //-----ALTERNATE JUMP CODE STARTS HERE-----
         //Move between levels at a constant velocity.
@@ -123,6 +106,9 @@ public class PlayerUnit : NetworkBehaviour
             Destroy(gameObject);
         }
 
+        if (Input.GetKeyDown(KeyCode.L))
+            CmdKnockback(new Vector3(15, 0, 0));
+
         //If we haven't already set the focus of the main camera to this, set it to this.
         //We already know this is our own player character, so we won't accidentally follow someone else.
         if (cameraUnset)
@@ -133,6 +119,8 @@ public class PlayerUnit : NetworkBehaviour
         }
     }
 
+
+
     [Command]
     void CmdSpawnBullet(Vector3 p, Quaternion r)
     {
@@ -142,21 +130,24 @@ public class PlayerUnit : NetworkBehaviour
         NetworkServer.Spawn(newBullet);
     }
 
+
+
     [Command]
-    void CmdUpdateVelocity(Vector3 v, Vector3 p)
+    void CmdUpdateVelocity(Vector3 v, Vector3 ev, Vector3 p)
     {
         // I am on a server
         transform.position = p;
         velocity = v;
+        externalVelocity = ev;
 
         //  transform.position = p + (v * (thisPlayersLatencyToServer))
 
         // Now let the clients know the correct position of this object.
-        RpcUpdateVelocity(velocity, transform.position);
+        RpcUpdateVelocity(velocity, externalVelocity, transform.position);
     }
 
     [ClientRpc]
-    void RpcUpdateVelocity(Vector3 v, Vector3 p)
+    void RpcUpdateVelocity(Vector3 v, Vector3 ev, Vector3 p)
     {
         // I am on a client
 
@@ -173,7 +164,8 @@ public class PlayerUnit : NetworkBehaviour
         //transform.position = p;
 
         velocity = v;
-        bestGuessPosition = p + (velocity * (ourLatency));
+        externalVelocity = ev;
+        bestGuessPosition = p + ((velocity + externalVelocity) * (ourLatency));
 
 
         // Now position of player one is as close as possible on all player's screens
@@ -199,6 +191,8 @@ public class PlayerUnit : NetworkBehaviour
         positionLock = pLock;
     }
 
+
+
     [Command]
     public void CmdDamage(int amount) {
         health -= amount;
@@ -212,6 +206,19 @@ public class PlayerUnit : NetworkBehaviour
     [ClientRpc]
     void RpcUpdateHealth(int newHealth) {
         health = newHealth;
+    }
+
+
+
+    [Command]
+    public void CmdKnockback(Vector3 kb) {
+        externalVelocity += kb;
+        RpcUpdateExternalVelocity(externalVelocity);
+    }
+
+    [ClientRpc]
+    void RpcUpdateExternalVelocity(Vector3 ev) {
+        externalVelocity = ev;
     }
 
 }

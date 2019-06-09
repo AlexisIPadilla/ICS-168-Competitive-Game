@@ -32,6 +32,7 @@ public class bullet : NetworkBehaviour
                 PlayerUnit opponent = other.gameObject.GetComponent<PlayerUnit>();
                 if (opponent) {
                     opponent.CmdDamage(10);
+                    opponent.CmdKnockback(transform.forward * 5);
                 }
             }
         }
